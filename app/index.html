@@ -1,0 +1,487 @@
+<head>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="apple-touch-icon" href="ddd-iphone-logo.png" /> 
+
+
+<title>dotdotdash</title>
+<script src="jquery.js"></script>
+<script src="codes.js"></script>
+
+<style>
+body {
+	margin: 0;
+	padding: 0;
+}
+
+* {
+	font-family: helvetica;
+}
+
+#screen {
+	width: 100%;
+	height: 100%;
+	background:#ddd;
+    position: fixed;
+}
+
+#left, #right {
+	position: absolute;
+	top: 0;
+	width: 12%;
+	background: #333;
+	height: 100%;
+	color: #fff;
+	z-index:2;
+}
+
+#left {
+	left: 0;
+	border-right: solid 1px #fff;
+}
+#right {
+	right: 0;
+	border-left: solid 1px #fff;
+}
+
+#bottom {
+	position: absolute;
+	bottom: 0;
+	right: 12%;
+	left:12%;
+	width: 80%;
+	background: #333;
+	height: 10%;
+	color: #fff;
+}
+
+.button {
+	cursor: pointer;
+}
+
+#left div.button, #right div.button {
+	text-align: center;
+	height: 27%;
+	vertical-align: center;
+	font-size:2.4em;
+	border-bottom: solid 1px #ddd;
+	font-family: times;
+	font-weight: bold;
+	position: relative;
+}
+
+div.button div.hint, 
+div.button div.label {
+	position: absolute;
+	text-align:center;
+	width: 50%;
+}
+
+#left div.button div {
+	right: 0;
+}
+#right div.button div {
+	left: 0;
+}
+
+
+div.button div.hint {
+	font-size: 24px;
+	bottom: 5px;
+	font-family: helvetica;
+}
+
+div.key div.label {
+	top: -10px;
+}
+
+#left div.one, #right div.one {
+	font-size: 100%;
+	font-family: helvetica;
+	height: 19%;
+	width: 100%;
+}
+
+.button-active {
+	color: #000;
+	text-shadow: 0 0 0.4em #fff;
+	background: #666;
+}
+
+#text {
+	position: absolute;
+	top: 0;
+	left: 12%;
+	border: none;
+	padding: 4px 8px;
+	overflow: auto;
+	width: 72%;
+	height: 87%;
+	background: #fff;
+	outline: none;
+	font-size: 18px;
+}
+
+
+textarea#text {
+	width: 80%;
+	height: 90%;
+}
+
+
+#text, #text * {
+	font-family: profont, monaco, courier, fixed;
+}
+
+#bottom {
+	bottom: 0;
+	position: absolute;
+	text-align: center;
+}
+
+#bottom div.button {
+	height: 100%;
+	display: block;
+	padding: 0 2%;
+	white-space: nowrap;
+	position:absolute;
+	text-align: center;
+	line-height: 150%;
+	border:solid 1px #fff;
+	border-bottom: none;
+	border-top: none;
+	font-weight: bolder;
+}
+
+#shift {
+	left:0;
+	width: 12%;
+}
+
+#enter {
+	right: 0;
+	width: 12%;
+	font-size: 140%;
+}
+
+div#spacebar.button {
+	width: 64%;
+	left: 16%;
+	border-color: transparent;
+	
+}
+
+#charbuf {	
+	display: block;
+	width: 90%;
+	position: absolute;
+	height: 10%;
+	top: 0;
+	left: 7%;
+	font-size: 24px;
+	background: #f60;
+	text-align: center;
+	opacity: 0.5;
+	display: none;
+}
+
+span.key {
+	font-weight: bold;
+	font-size: 120%;
+    padding: 2px;
+	background: #ff9;
+}
+
+#caret {
+	background:#ddd;
+}
+</style>
+
+<!--
+onorientationchange="updateOrientation();"
+-->
+</head>
+
+<body >
+<!--onload="setTimeout(function() { window.scrollTo(0, 1); }, 1);">-->
+<div id="screen">
+  <div id="charbuf"></div>
+  <div id="left">
+	<div title="shift" id="shift" class="button one"><span class="label">&#8682;</span></div>
+	<div title="." class="button key"><div class="label">&#0183;</div><div class="hint"></div></div>
+    <div title=".." class="button key"><div class="label">&#0183;&#0183;</div><div class="hint"></div></div>
+	<div title="-." class="button key"><div class="label">&#8208;&#0183;</div><div class="hint"></div></div>
+  </div>
+  <div id="right">
+    <div title="del" id="del" class="button one">&lArr;</div>
+	<div title="-" class="button key"><div class="label">&#8208;</div><div class="hint"></div></div>
+	<div title="--" class="button key"><div class="label">&#8208;&#8208;</div><div class="hint"></div></div>
+	<div title=".-" class="button key"><div class="label">&#0183;&#8208;</div><div class="hint"></div></div>
+  </div>
+
+  <div id="bottom">
+	<div title=" " id="spacebar" class="button"> space </div>
+	<div title="ENTER" id="enter" class="button">&#8617;</div>
+  </div>
+
+  <div id="text" contentEditable="true"><br/></div>
+</div>
+
+
+<script>
+
+//http://niichavo.wordpress.com/2009/01/06/contentEditable-div-cursor-position/
+function getCursorPos() {
+	var cursorPos;
+	if (window.getSelection) {
+		var selObj = window.getSelection();
+		var selRange = selObj.getRangeAt(0);
+		cursorPos =  findNode(selObj.anchorNode.parentNode.childNodes, selObj.anchorNode) + selObj.anchorOffset;
+	} else if (document.selection) {
+		var range = document.selection.createRange();
+		var bookmark = range.getBookmark();
+		cursorPos = bookmark.charCodeAt(2) - 11; /* Undocumented function [3] */
+	}
+	return cursorPos;
+}
+function findNode(list, node) {
+	for (var i = 0; i < list.length; i++) {
+		if (list[i] == node) {
+			return i;
+		}
+    }
+    return -1;
+}
+
+
+
+
+var keys = $('div.key');
+var labels = $('div.key span.label').map(function(o){return $(this);});;
+var hints = $('div.key div.hint').map(function(o){return $(this);});
+var ok = $('#ok');
+var oklabel = ok.find('span.label:first');
+var okhint = ok.find('div.hint:first');
+
+function showHints() {
+    var code = getCode();
+
+	var c = code[chordBuffer];
+	if (c) {
+		okhint.html(c);
+	}
+
+	for (var i=0; i<keys.length; i++) {
+		var c = code[chordBuffer+keys[i].title];
+        if (c) {
+		    hints[i].html(c);
+        } else {
+		    hints[i].text('');
+		}
+	}
+}
+
+
+function moveCaret(s, e) {
+  var sel = window.getSelection();
+  var range = sel.getRangeAt(0);
+  range.collapse(true);
+  range.setStart($('#ranger')[0], s);
+  range.setEnd($('#ranger')[0], e);
+}
+
+
+
+function getCode() {
+	var name = CAPSLOCK ? 'defaultShift' : 'default';
+	return codes[name];
+}
+
+var chordBuffer = '';
+var numKeys = 0;
+var CAPSLOCK = false;
+var charPid = null;
+var caret = $('#caret');
+
+function reset() {
+	chordBuffer = '';
+	numKeys = 0;
+	if (CAPSLOCK) {
+		$('#shift').removeClass('button-active');
+    }
+
+	CAPSLOCK = false;
+	//caret.text('_');
+
+    hints.each(function(){this.html('');})
+    okhint.html('');
+
+	charPid = null;
+
+	//$('#charbuf').text('');
+   $('#debug').val($('#text')[0].innerHTML);
+}
+
+function finishChar(val) {
+	if (!val && !chordBuffer) { return; }
+	var c = getCode()[chordBuffer+val] || '?';
+	if (c) {
+		insertChar(c);
+	}
+	reset();
+}
+
+function insertChar(c) {
+    document.execCommand('inserthtml', false, c);
+}
+function deleteChar(c) {
+    document.execCommand('delete', false, '');
+}
+
+$('#screen').find('div.button').each(function(b) {
+   var t = this;
+   if (this && this.title) {
+    var ts = function(e) {
+
+		e.stopPropagation();
+		e.preventDefault();
+
+		window.clearTimeout(charPid);
+
+		$(t).addClass('button-active');
+
+		var val = t.title;
+
+		if (val != 'shift') {
+           window.setTimeout(function(){$(t).removeClass('button-active');}, 150);
+		}
+
+		//soundz!!!!!! (unfortunately a non-starter on iphone)
+		if (soundFns[val]) {
+            soundFns[val]();
+        }
+
+        // special keys: shift, space, etc.
+		//todo: need a more sensible "literal char insert" framework
+		if (val === ' ') {
+			if (chordBuffer) {
+				finishChar('');
+			}
+			if (CAPSLOCK) {
+			    insertChar('&emsp;&emsp;'); //"tab" todo: configurable.
+            } else {
+			    insertChar('&emsp;');
+            }
+            window.setTimeout(function(){$('#spacebar').removeClass('button-active');}, 300);
+			return;
+		} else
+
+        //todo: double-tap to make a eal CAPSLOCK
+		if (val === 'shift') {
+			CAPSLOCK = !CAPSLOCK;
+			if (CAPSLOCK) {
+				$('#shift').addClass('button-active');
+			} else {
+				$('#shift').removeClass('button-active');
+			}
+			return;
+		} else
+
+
+		if (val === 'ENTER') {
+			if (chordBuffer) {
+				finishChar('');
+			}
+			//insertChar('&#x000D;&#x000A;');
+			insertChar('<br/>_');
+			deleteChar(); // cringey hack; add newline+char, then delete the char.
+			return;
+		} else
+
+		// user pressed del
+		if (val === 'del') {
+			if (!chordBuffer) {
+				deleteChar();
+			}
+            window.setTimeout(function(){$('#del').removeClass('button-active');}, 300);
+			reset();
+			return;
+		}
+
+		//$('#caret').html(getCode()[chordBuffer+val]);
+	    if (numKeys > 0) {
+			deleteChar();
+        }
+		insertChar(getCode()[chordBuffer+val]||'?');
+
+
+		numKeys += 1;
+
+		charPid = window.setTimeout(function(){deleteChar();finishChar('');reset();}, 300);
+
+		chordBuffer += val;
+		//$('#charbuf').text(' nk:'+ numKeys +' '+ chordBuffer + '  ' + (codes['default'][chordBuffer]||''));
+
+		showHints();
+	};
+
+    // :)
+	t.addEventListener("touchstart", ts, false);
+	t.addEventListener("mousedown", ts, false);
+
+   }
+});
+
+
+$('#text').focus();
+//$('#text').blur(function(){this.focus();});
+
+//moveCaret(0,0);
+
+//disable iphone page scroll
+document.body.addEventListener("touchmove", function(e) {
+	e.preventDefault();
+}, false);
+
+
+soundFns = {}
+</script>
+
+
+<textarea style="display:none;position:absolute;top:330px; width:480px; height:300px;" id="debug"></textarea>
+
+</body>
+
+
+<!-- oh, apple. disabling all embedded media in iphone. -->
+<!--
+<div style="visibility:hidden">
+  <embed EnableJavaScript="true" src="button-19.mp3" autostart="false" loop="false"  height="45" width="170" ></embed>
+  <embed EnableJavaScript="true" src="button-21.mp3" autostart="false" loop="false"  height="45" width="170" ></embed>
+  <embed EnableJavaScript="true" src="button-19.mp3" autostart="false" loop="false"  height="45" width="170" ></embed>
+  <embed EnableJavaScript="true" src="button-21.mp3" autostart="false" loop="false"  height="45" width="170" ></embed>
+</div>
+<script>
+var sounds = $('embed');
+function play(idx, idx2) {
+   sounds[idx].Stop();
+   sounds[idx].Rewind();
+   sounds[idx].Play();
+   if (idx2) {
+      window.setTimeout(function() {
+          play(idx2);
+      }, 140);
+   }
+}
+soundFns = {
+    '.':  function() {play(0);},
+    '-':  function() {play(1);},
+    '..': function() {play(0,2);},
+    '.-': function() {play(0,3);},
+    '--': function() {play(1,3);},
+    '-.': function() {play(1,2);},
+};	
+</script>
+-->
+

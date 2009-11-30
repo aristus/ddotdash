@@ -1,0 +1,83 @@
+<script src="app/codes.js"></script>
+<script src="app/jquery.js"></script>
+<style>
+* {
+   font-family: helvetica;
+}
+
+.cheat b {
+  color: #900;
+}
+.cheat * {
+   font-family: courier;
+   font-size: 1.1em;
+}
+
+b.key {
+   font-family: courier;
+   white-space: nowrap;
+}
+</style>
+
+<div style="width:700px">
+<h1>ddotdash: a mobile morse keyboard</h1>
+
+<p>Stop laughing and <a href="app/index.html">try it on your iPhone</a>. Load it up in Safari, click the "+" and choose "Add to home screen" to make it a full-screen app.  Other mobiles may also work, let me know!</p>
+
+<p>This is an experiment in touch-typing for mobiles. <b>It does not save your text.</b> The code is GPL and <a href="http://github.com/aristus/ddotdash">posted to GitHub</a>. Email me at carlos&#64;bueno.org if you'd like to help out.</p>
+
+<p>Known bugs:</p>
+<ul>
+<li>the caret is invisible in safari</li>
+<li>scrolling does not work</li>
+<li>iPhone helpfully jumps in with the Copy helper at the wrong times</li>
+<li>there is no double-quote character</li>
+</ul>
+
+<iframe width="480" height="320" src="app/index.html"></iframe>
+
+<p>The code is a modified International Morse. Specifically I've added a "Shift" alphabet and a lot more punctuation. Accented characters are moved out to make room for punctuation (sorry, Finland).</p>
+
+
+<h3>Cheat Sheet <a name="cheat" href="#cheat-shift">(shift)</a></h3>
+<p>There are 6 buttons instead of the standard 1 to make it faster to type longer codes. You can enter "i" as <b class="key">[.][.]</b> or simply <b class="key">[..]</b>.</p>
+<pre class="cheat"></pre>
+
+<h3>Shift Cheat Sheet <a name="cheat-shift" href="#cheat">(normal)</a></h3>
+<pre class="cheat"></pre>
+
+</div>
+
+<script>
+function code2sequence(code) {
+   var buf = '';
+   for (var i=0; i<code.length; i+=2) {
+	   buf += '['+code[i];
+       if (code[i+1]) {
+          buf += code[i+1];
+       }
+       buf += ']';
+   }
+   return buf;
+}
+
+function codepage2cheat(cp, cols) {
+    var buf = [];
+    for (code in cp) {
+        var line = '<b>'+cp[code] + '</b>  ' + code2sequence(code);
+        buf.push(line)
+    }
+    cols = cols||2;
+    var rows = parseInt(buf.length / cols);
+    var html = ['<table width="700"><td valign="top">'];
+    for (var i=0; i<cols; i++) {
+        html.push('<td valign="top">'+buf.slice(i*rows, (i*rows+rows)).join('<br/>')+'</td>');
+    }
+
+    return html.join('');
+}
+
+$($.find('.cheat')[0]).html(codepage2cheat(codes['default'], 3));
+$($.find('.cheat')[1]).html(codepage2cheat(codes['defaultShift'], 3));
+
+</script>
