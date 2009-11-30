@@ -1,3 +1,4 @@
+<title>ddotdash: a mobile morse keyboard</title>
 <script src="app/codes.js"></script>
 <script src="app/jquery.js"></script>
 <style>
@@ -24,23 +25,25 @@ b.key {
 
 <p>Stop laughing and <a href="app/index.html">try it on your iPhone</a>. Load it up in Safari, click the "+" and choose "Add to home screen" to make it a full-screen app.  Other mobiles may also work, let me know!</p>
 
-<p>This is an experiment in touch-typing for mobiles. <b>It does not save your text.</b> The code is GPL and <a href="http://github.com/aristus/ddotdash">posted to GitHub</a>. Email me at carlos&#64;bueno.org if you'd like to help out.</p>
+<p>This is an experiment in touch-typing for mobiles. <b>It does not save your text.</b> The code is GPL and <a href="http://github.com/aristus/ddotdash">posted to GitHub</a>. Email me at carlos&#64;bueno.org if you'd like to help out. <a href="http://carlos.bueno.org/2009/11/ycombinators-rfs-5-accidental-case.html">The original essay</a>.</p>
 
 <p>Known bugs:</p>
 <ul>
 <li>the caret is invisible in safari</li>
+<li>text area sometimes loses focus</li>
 <li>scrolling does not work</li>
 <li>iPhone helpfully jumps in with the Copy helper at the wrong times</li>
-<li>there is no double-quote character</li>
+<li>some punctuation is awkward</li>
 </ul>
 
 <iframe width="480" height="320" src="app/index.html"></iframe>
 
-<p>The code is a modified International Morse. Specifically I've added a "Shift" alphabet and a lot more punctuation. Accented characters are moved out to make room for punctuation (sorry, Finland).</p>
+<p>The code is a modified International Morse. Specifically I've added a "Shift" alphabet and a lot more punctuation. Accented characters are moved out to make room for punctuation (sorry, Sweden).</p>
+
+<p>There are 6 buttons instead of the standard 1 to make it faster to type longer codes. You can enter "i" as <b class="key">[.][.]</b> or simply <b class="key">[..]</b>. The character sequence automattically ends after about 300 milliseconds.</p>
 
 
 <h3>Cheat Sheet <a name="cheat" href="#cheat-shift">(shift)</a></h3>
-<p>There are 6 buttons instead of the standard 1 to make it faster to type longer codes. You can enter "i" as <b class="key">[.][.]</b> or simply <b class="key">[..]</b>.</p>
 <pre class="cheat"></pre>
 
 <h3>Shift Cheat Sheet <a name="cheat-shift" href="#cheat">(normal)</a></h3>
